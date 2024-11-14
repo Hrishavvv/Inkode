@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini CodePen Clone</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="editor-container">
+        <div class="editor">
+            <div class="editor-section">
+                <label for="html">HTML</label>
+                <textarea id="html" placeholder="Write HTML code" spellcheck="false"></textarea>
+            </div>
+            <div class="editor-section">
+                <label for="css">CSS</label>
+                <textarea id="css" placeholder="Write CSS code" spellcheck="false"></textarea>
+            </div>
+            <div class="editor-section">
+                <label for="js">JavaScript</label>
+                <textarea id="js" placeholder="Write JavaScript code" spellcheck="false"></textarea>
+            </div>
+            <input type="file" id="uploadFiles" multiple webkitdirectory mozdirectory directory>
+            <label for="uploadFiles" class="upload-label">Upload Images/Folders</label>
+        </div>
+        <div class="resizable">
+            <div class="output-container">
+                <iframe id="output"></iframe>
+            </div>
+            <button id="openInNewTab" class="open-btn" onclick="openInNewTab()">Open in New Tab</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
