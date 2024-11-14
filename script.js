@@ -5,12 +5,16 @@ document.addEventListener("DOMContentLoaded", function() {
     const outputFrame = document.getElementById('output');
     const uploadFiles = document.getElementById('uploadFiles');
     const imageStore = {};
+    const terminalIcon = document.getElementById('terminalIcon');
+    const terminalOverlay = document.getElementById('terminalOverlay');
+    const terminalInput = document.getElementById('terminalInput');
+    const terminalOutput = document.getElementById('terminalOutput');
 
     function loadFromLocalStorage() {
         htmlInput.value = localStorage.getItem('html') || '';
         cssInput.value = localStorage.getItem('css') || '';
         jsInput.value = localStorage.getItem('js') || '';
-        updateOutput(); 
+        updateOutput();
     }
 
     function saveToLocalStorage() {
@@ -26,7 +30,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         htmlCode = htmlCode.replace(/<img\s+src="([^"]+)"/g, (match, src) => {
             const imageUrl = imageStore[src] || src;
-            return `<img src="${imageUrl}"`;
+            return `<img src="${imageUrl}"` ;
         });
 
         const code = htmlCode + cssCode + jsCode;
@@ -67,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         htmlCode = htmlCode.replace(/<img\s+src="([^"]+)"/g, (match, src) => {
             const imageUrl = imageStore[src] || src;
-            return `<img src="${imageUrl}"`;
+            return `<img src="${imageUrl}"` ;
         });
 
         const code = htmlCode + cssCode + jsCode;
@@ -76,5 +80,68 @@ document.addEventListener("DOMContentLoaded", function() {
         newWindow.document.close();
     }
 
-    document.getElementById('openInNewTab').onclick = openInNewTab;
+    document.getElementById('openInNewTab').addEventListener('click', openInNewTab);
+
+    function captureConsole() {
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+
+        console.log = function(...args) {
+            originalConsoleLog(...args);
+            appendToTerminal(args);
+        };
+
+        console.error = function(...args) {
+            originalConsoleError(...args);
+            appendToTerminal(args, true);
+        };
+    }
+
+    function appendToTerminal(args, isError = false) {
+        const message = args.map(arg => typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg).join(' ');
+        terminalOutput.value += (isError ? `Error: ${message}` : message) + '\n';
+        terminalOutput.scrollTop = terminalOutput.scrollHeight;
+    }
+
+    function executeJSFromTextbox() {
+        const jsCode = terminalInput.value;
+        terminalOutput.value += `$ ${jsCode}\n`;
+
+        try {
+            new Function(jsCode)();
+        } catch (error) {
+            console.error(error.message);
+        }
+        terminalInput.value = '';
+    }
+
+    function toggleTerminal() {
+        if (terminalOverlay.style.display === 'flex') {
+            terminalOverlay.style.display = 'none';
+        } else {
+            terminalOverlay.style.display = 'flex';
+            terminalInput.focus();
+            terminalOutput.value = '';
+        }
+    }
+
+    terminalIcon.addEventListener('click', toggleTerminal);
+
+    terminalInput.addEventListener('keydown', function(event) {
+        if (event.key === 'Enter' && !event.shiftKey) {
+            event.preventDefault();
+            executeJSFromTextbox();
+        } else if (event.key === 'Enter' && event.shiftKey) {
+            terminalInput.value += '\n';
+            event.preventDefault();
+        }
+    });
+
+    document.addEventListener('keydown', function(event) {
+        if (event.ctrlKey && event.key === ' ') {
+            toggleTerminal();
+        }
+    });
+
+    captureConsole();
 });
